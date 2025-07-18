@@ -1,0 +1,55 @@
+# ----------------------------------------------------
+# Step Functions State Machine Definition
+# File: statemachine.json
+# ----------------------------------------------------
+ {
+   "Comment": "Intelligently optimizes EBS volumes from gp2 to gp3.",
+   "StartAt": "Filter and Log GP2 Volumes",
+   "States": {
+     "Filter and Log GP2 Volumes": {
+       "Type": "Task",
+       "Resource": "arn:aws:states:::lambda:invoke",
+       "Parameters": {
+         "FunctionName": "PASTE_YOUR_EBS_FilterAndLog_LAMBDA_ARN_HERE",
+         "Payload.$": "$"
+       },
+       "ResultSelector": {
+         "volumes_list.$": "$.Payload.volumes_to_convert"
+       },
+       "Next": "Convert Volumes Iteration"
+     },
+     "Convert Volumes Iteration": {
+       "Type": "Map",
+       "ItemsPath": "$.volumes_list",
+       "ItemProcessor": {
+         "ProcessorConfig": {
+           "Mode": "INLINE"
+         },
+         "StartAt": "Modify Volume to GP3",
+         "States": {
+           "Modify Volume to GP3": {
+             "Type": "Task",
+             "Resource": "arn:aws:states:::lambda:invoke",
+             "Parameters": {
+               "FunctionName": "PASTE_YOUR_EBS_ModifyVolume_LAMBDA_ARN_HERE",
+               "Payload.$": "$"
+             },
+             "ResultPath": "$.modification_result",
+             "Next": "Notify Success"
+           },
+           "Notify Success": {
+             "Type": "Task",
+             "Resource": "arn:aws:states:::sns:publish",
+             "Parameters": {
+               "TopicArn": "PASTE_YOUR_SNS_TOPIC_ARN_HERE",
+               "Subject": "EBS Volume Optimization Report",
+               "Message.$": "States.Format('Status: {}\\nVolume ID: {}\\nRegion: {}\\nDetails: {}', $.modification_result.Payload.Status, $.modification_result.Payload.VolumeId, $.modification_result.Payload.Region, $.modification_result.Payload.Message)"
+             },
+             "End": true
+           }
+         }
+       },
+       "End": true
+     }
+   }
+ }
