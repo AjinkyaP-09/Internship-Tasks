@@ -1,7 +1,7 @@
-# ----------------------------------------------------
-# Step Functions State Machine Definition
-# File: statemachine.json
-# ----------------------------------------------------
+// ----------------------------------------------------
+// Step Functions State Machine Definition
+// File: statemachine.json
+// ----------------------------------------------------
  {
    "Comment": "Intelligently optimizes EBS volumes from gp2 to gp3.",
    "StartAt": "Filter and Log GP2 Volumes",
