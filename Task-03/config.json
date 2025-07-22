@@ -1,0 +1,12 @@
+{
+  "project_name": "AutomatedBackupProject",
+  "local_backup_base_dir": "~/backups",
+  "rclone_remote_name": "automatedBackup",
+  "google_drive_folder_name": "ProjectBackups",
+  "retention": {
+    "daily": 7,
+    "weekly": 4,
+    "monthly": 3
+  },
+  "webhook_url": "https://webhook.site/7f25bc7d-de42-4518-ae81-90459237ed55"
+}
