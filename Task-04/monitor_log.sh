@@ -5,7 +5,7 @@ MAX_SIZE_BYTES=1073741824 # 1GB in bytes
 JENKINS_URL="http://localhost:8080"
 JOB_NAME="Task-04"
 JENKINS_USER="admin"
-API_TOKEN="1151a10ae5accfe386201e2990397d4e37" # Generate this in Jenkins user settings
+API_TOKEN="YOUR_JENKINS_API_TOKEN" # Generate this in Jenkins user settings
 
 # Get file size in bytes
 FILE_SIZE=$(stat -c%s "$LOG_FILE")
