@@ -1,0 +1,53 @@
+Started by user ajinkya
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/Task-04
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Archive to S3)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ basename /var/log/httpd/access.log
+[Pipeline] echo
+Archiving /var/log/httpd/access.log to s3://internship-task-04/access.log-20250723-080016.gz
+[Pipeline] withAWS
+Constructing AWS Credentials[Pipeline] {
+[Pipeline] sh
++ gzip -c /var/log/httpd/access.log
++ aws s3 cp - s3://internship-task-04/access.log-20250723-080016.gz
+[Pipeline] }
+[Pipeline] // withAWS
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Verify Upload & Clear Log)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+Verifying upload and clearing original log file...
+[Pipeline] sh
++ truncate -s 0 /var/log/httpd/access.log
+[Pipeline] echo
+Successfully cleared /var/log/httpd/access.log
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Log archive job completed successfully.
+[Pipeline] mail
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

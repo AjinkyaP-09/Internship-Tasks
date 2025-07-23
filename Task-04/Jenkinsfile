@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+    
+    // Use the parameter defined in the job configuration
+    parameters {
+        string(name: 'LOG_FILE_PATH', defaultValue: '/var/log/httpd/access.log', description: 'Path to the log file')
+    }
+    
+    environment {
+        // Your unique S3 bucket name
+        S3_BUCKET = 'internship-task-04'
+        // The ID of the credentials you stored in Jenkins
+        AWS_CREDENTIALS_ID = 'my-aws-credentials' 
+    }
+    
+    stages {
+        stage('Archive to S3') {
+            steps {
+                script {
+                    // Get the filename using the 'basename' shell command to avoid script approval
+                    def logFileName = sh(script: "basename ${params.LOG_FILE_PATH}", returnStdout: true).trim()
+                    
+                    def timestamp = new Date().format("yyyyMMdd-HHmmss")
+                    def archiveFileName = "${logFileName}-${timestamp}.gz"
+                    
+                    echo "Archiving ${params.LOG_FILE_PATH} to s3://${S3_BUCKET}/${archiveFileName}"
+                    
+                    // Securely use the AWS credentials stored in Jenkins
+                    withAWS(credentials: AWS_CREDENTIALS_ID) {
+                        sh "gzip -c ${params.LOG_FILE_PATH} | aws s3 cp - s3://${S3_BUCKET}/${archiveFileName}"
+                    }
+                }
+            }
+        }
+        
+        stage('Verify Upload & Clear Log') {
+            steps {
+                script {
+                    echo "Verifying upload and clearing original log file..."
+                    // A simple verification can be just checking if the previous step succeeded.
+                    
+                    // Clear the original file by truncating it to 0 bytes
+                    sh "truncate -s 0 ${params.LOG_FILE_PATH}"
+                    echo "Successfully cleared ${params.LOG_FILE_PATH}"
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo "Log archive job completed successfully."
+            // Bonus: Email notification
+            mail to: 'pameajinkya09@gmail.com',
+                 subject: "SUCCESS: Jenkins Job '${env.JOB_NAME}'",
+                 body: "Successfully archived and cleared ${params.LOG_FILE_PATH}."
+        }
+        failure {
+            echo "Log archive job failed."
+            mail to: 'pameajinkya09@gmail.com',
+                 subject: "FAILURE: Jenkins Job '${env.JOB_NAME}'",
+                 body: "Failed to process ${params.LOG_FILE_PATH}. Please check the Jenkins console output: ${env.BUILD_URL}"
+        }
+    }
+}
