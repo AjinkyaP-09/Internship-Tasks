@@ -1,0 +1,6 @@
+# ansible/roles/webserver/handlers/main.yml
+# FIXED: Added the missing handler file and definition.
+- name: Restart Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted

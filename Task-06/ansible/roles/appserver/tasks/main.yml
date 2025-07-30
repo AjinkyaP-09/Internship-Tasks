@@ -1,0 +1,24 @@
+# ansible/roles/appserver/tasks/main.yml
+- name: Update all packages
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+
+- name: Install Apache (httpd), PHP, and MySQL driver
+  ansible.builtin.yum:
+    name:
+      - httpd
+      - php
+      - php-mysqlnd
+    state: present
+
+- name: Copy submit.php script
+  template:
+    src: submit.php.j2
+    dest: /var/www/html/submit.php
+
+- name: Start and enable Apache service
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: yes

@@ -1,0 +1,62 @@
+# ansible/roles/appserver/templates/submit.php.j2
+# PHP script to process form data and insert into the database.
+<?php
+header('Content-Type: text/html; charset=utf-8');
+
+// --- Database Connection Details ---
+// These values are securely passed in by Ansible.
+$servername = "{{ db_endpoint }}";
+$username = "{{ db_user }}";
+$password = "{{ db_pass }}";
+$dbname = "{{ db_name }}";
+
+// --- Form Data ---
+$name = isset($_POST['name']) ? $_POST['name'] : '';
+$email = isset($_POST['email']) ? $_POST['email'] : '';
+
+// Simple validation
+if (empty($name) || empty($email)) {
+    die("<h1>Error</h1><p>Name and Email are required.</p><a href='/'>Go Back</a>");
+}
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("<h1>Connection Failed</h1><p>Could not connect to the database: " . $conn->connect_error . "</p>");
+}
+
+// Set the client character set to avoid "charset unknown" errors with MySQL 8
+$conn->set_charset("utf8mb4");
+
+// --- Create Table if it doesn't exist ---
+$tableName = "registrations";
+$sql_create_table = "CREATE TABLE IF NOT EXISTS $tableName (
+    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)";
+
+if (!$conn->query($sql_create_table)) {
+    die("<h1>Error creating table</h1><p>" . $conn->error . "</p>");
+}
+
+// --- Insert Data ---
+$stmt = $conn->prepare("INSERT INTO $tableName (name, email) VALUES (?, ?)");
+if ($stmt === false) {
+    die("<h1>Prepare failed</h1><p>" . $conn->error . "</p>");
+}
+
+$stmt->bind_param("ss", $name, $email);
+
+if ($stmt->execute()) {
+    echo "<h1>Success!</h1><p>New record created successfully for " . htmlspecialchars($name) . ".</p><a href='/'>Register another user</a>";
+} else {
+    echo "<h1>Error</h1><p>" . $stmt->error . "</p><a href='/'>Go Back</a>";
+}
+
+$stmt->close();
+$conn->close();
+?>

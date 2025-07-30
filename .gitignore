@@ -1,2 +1,19 @@
 /Task-03/venv
 /Task-05/.env
+/Task-06/terraform.tfstate
+/Task-06/terraform.tfstate.backup
+/Task-06/terraform.tfvars
+/Task-06/.terraform.lock.hcl
+/Task-06/.terraform
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+*.log
+**/.terraform/

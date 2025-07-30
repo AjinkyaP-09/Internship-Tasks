@@ -1,0 +1,13 @@
+# ansible/playbook.yml
+# The main playbook that runs roles on the specified hosts.
+- name: Configure Web Server
+  hosts: web
+  become: true # <-- BEST PRACTICE: Set privilege escalation at the play level.
+  roles:
+    - webserver
+
+- name: Configure App Server
+  hosts: app
+  become: true # <-- BEST PRACTICE: Set privilege escalation at the play level.
+  roles:
+    - appserver
