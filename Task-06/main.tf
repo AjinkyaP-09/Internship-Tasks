@@ -12,8 +12,7 @@ module "vpc" {
 }
 
 // 2. Security Groups
-// DEFINITIVE FIX: Reverted to inline rules to force an "update" instead of a "destroy".
-// This avoids the dependency lock and state inconsistency on the existing infrastructure.
+// Using inline rules for simplicity and the definitive bastion SSH rule.
 resource "aws_security_group" "web_sg" {
   name        = "${var.project_name}-web-sg"
   description = "Allow HTTP/S and SSH traffic"
@@ -71,7 +70,8 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = [var.my_ip]
   }
 
-  // This is the definitive rule that allows the web server (bastion) to SSH to the app server.
+  // DEFINITIVE FIX: This is the most robust and canonical way to allow the bastion connection.
+  // It allows SSH traffic from any instance that is a member of the web security group.
   ingress {
     from_port       = 22
     to_port         = 22
@@ -189,4 +189,3 @@ resource "null_resource" "ansible_provision" {
     command = "ansible-playbook -i ansible/inventory.ini ansible/playbook.yml"
   }
 }
-
