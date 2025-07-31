@@ -1,10 +1,8 @@
-# ansible/roles/appserver/tasks/main.yml
 - name: Update all packages
   ansible.builtin.yum:
     name: '*'
     state: latest
 
-# DEFINITIVE FIX: Enable a modern version of PHP to ensure MySQL 8 compatibility.
 - name: Enable PHP 8.2 from amazon-linux-extras
   ansible.builtin.command: amazon-linux-extras install php8.2 -y
 
@@ -16,10 +14,24 @@
       - php-mysqlnd
     state: present
 
+- name: Install MySQL command-line client
+  ansible.builtin.yum:
+    name: mysql
+    state: present
+
+- name: Set database collation for compatibility
+  ansible.builtin.command: "mysql -h {{ db_endpoint | regex_replace(':\\d+$', '') }} -P {{ db_endpoint | regex_replace('^.*:', '') }} -u {{ db_user }} -p'{{ db_pass }}' -e \"ALTER DATABASE {{ db_name }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\""
+  changed_when: false
+
+- name: Pre-create registrations table with correct collation (idempotent)
+  ansible.builtin.command: "mysql -h {{ db_endpoint | regex_replace(':\\d+$', '') }} -P {{ db_endpoint | regex_replace('^.*:', '') }} -u {{ db_user }} -p'{{ db_pass }}' {{ db_name }} -e \"CREATE TABLE IF NOT EXISTS registrations (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50) NOT NULL, email VARCHAR(50) NOT NULL, reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\""
+  changed_when: false
+
 - name: Copy submit.php script
   template:
     src: submit.php.j2
     dest: /var/www/html/submit.php
+  notify: Restart httpd
 
 - name: Start and enable Apache service
   ansible.builtin.service:

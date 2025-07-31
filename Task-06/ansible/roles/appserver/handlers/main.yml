@@ -1,0 +1,5 @@
+# ansible/roles/appserver/handlers/main.yml
+- name: Restart httpd
+  ansible.builtin.service:
+    name: httpd
+    state: restarted

@@ -28,21 +28,10 @@ if ($conn->connect_error) {
 // Set the client character set to avoid "charset unknown" errors with MySQL 8
 $conn->set_charset("utf8mb4");
 
-// --- Create Table if it doesn't exist ---
-$tableName = "registrations";
-$sql_create_table = "CREATE TABLE IF NOT EXISTS $tableName (
-    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL,
-    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)";
-
-if (!$conn->query($sql_create_table)) {
-    die("<h1>Error creating table</h1><p>" . $conn->error . "</p>");
-}
+// --- The registrations table is now created by Ansible, so we can just insert data. ---
 
 // --- Insert Data ---
-$stmt = $conn->prepare("INSERT INTO $tableName (name, email) VALUES (?, ?)");
+$stmt = $conn->prepare("INSERT INTO registrations (name, email) VALUES (?, ?)");
 if ($stmt === false) {
     die("<h1>Prepare failed</h1><p>" . $conn->error . "</p>");
 }
