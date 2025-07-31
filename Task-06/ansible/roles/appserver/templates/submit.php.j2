@@ -10,7 +10,7 @@ header('Content-Type: text/html; charset=utf-8');
 // These values are securely passed in by Ansible.
 $servername = "{{ db_endpoint }}";
 $username = "{{ db_user }}";
-$password = "{{ db_pass }}";
+$password = '{{ db_pass | replace("'", "\\'") }}';
 $dbname = "{{ db_name }}";
 
 // --- Form Data ---
