@@ -4,6 +4,10 @@
     name: '*'
     state: latest
 
+# DEFINITIVE FIX: Enable a modern version of PHP to ensure MySQL 8 compatibility.
+- name: Enable PHP 8.2 from amazon-linux-extras
+  ansible.builtin.command: amazon-linux-extras install php8.2 -y
+
 - name: Install Apache (httpd), PHP, and MySQL driver
   ansible.builtin.yum:
     name:
