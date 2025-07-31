@@ -1,5 +1,4 @@
 <?php
-// PHP script to process form data and insert into the database.
 header('Content-Type: text/html; charset=utf-8');
 
 // --- Database Connection Details ---
@@ -26,7 +25,10 @@ if ($conn->connect_error) {
     die("<h1>Connection Failed</h1><p>Could not connect to the database: " . $conn->connect_error . "</p>");
 }
 
+// FINAL FIX: Set the client character set to avoid "charset unknown" errors with MySQL 8
 $conn->set_charset("utf8mb4");
+// Explicitly set the collation for the connection
+$conn->query("SET collation_connection = 'utf8mb4_unicode_ci'");
 
 // --- Create Table if it doesn't exist ---
 $tableName = "registrations";
