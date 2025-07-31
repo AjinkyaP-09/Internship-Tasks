@@ -27,7 +27,7 @@ if ($conn->connect_error) {
     die("<h1>Connection Failed</h1><p>Could not connect to the database: " . $conn->connect_error . "</p>");
 }
 
-// Set the client character set to avoid "charset unknown" errors with MySQL 8
+// FINAL FIX: Set the client character set to avoid "charset unknown" errors with MySQL 8
 $conn->set_charset("utf8mb4");
 
 // --- Create Table if it doesn't exist ---
